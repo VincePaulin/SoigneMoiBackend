@@ -66,35 +66,38 @@ class AuthController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:6',
             'address' => 'required|string',
+        ], [
+            'email.unique' => 'Cet email est déjà utilisé.',
         ]);
-    
-        // Errors
+
+        // Erreurs
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Registration failed',
+                'message' => 'La création du compte a échoué. ',
                 'errors' => $validator->errors(),
             ], 422);
         }
-    
-        // Create a new user
+
+        // Création d'un nouvel utilisateur
         $user = new User();
         $user->name = $request->name;
         $user->email = $request->email;
         $user->password = bcrypt($request->password);
         $user->address = $request->address;
         $user->save();
-    
-        // After registration, automatically connect user
+
+        // Après l'inscription, connectez automatiquement l'utilisateur
         Auth::login($user);
-    
-        // Generate a JWT token for the user
+
+        // Génération d'un jeton JWT pour l'utilisateur
         $token = $user->createToken('AuthToken')->accessToken;
-    
-        // Return a success response with the access token
+
+        // Retourne une réponse de succès avec le jeton d'accès
         return response()->json([
-            'message' => 'User registered successfully',
+            'message' => 'Utilisateur inscrit avec succès',
             'user' => $user,
             'access_token' => $token,
         ], 201);
     }
+
 }
