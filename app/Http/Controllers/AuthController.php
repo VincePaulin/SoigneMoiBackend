@@ -50,4 +50,14 @@ class AuthController extends Controller
             'email' => [Lang::get('auth.failed')],
         ]);
     }
+    
+    public function getUser(Request $request)
+    {
+        // Récupérer l'utilisateur authentifié
+        $user = $request->user();
+
+        // Vous pouvez retourner les informations de l'utilisateur sous forme de réponse JSON
+        return response()->json(['user' => $user], 200);
+    }
+
 }
