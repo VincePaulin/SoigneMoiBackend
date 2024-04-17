@@ -36,11 +36,18 @@ class AuthController extends Controller
                 'address' => $request->address,
             ]);
 
-            return response()->json(['message' => 'Utilisateur enregistré avec succès', 'user' => $user], 201);
+            // Authentifier automatiquement l'utilisateur nouvellement enregistré
+            Auth::login($user);
+
+            // Générer un token pour l'utilisateur nouvellement enregistré
+            $token = $user->createToken('AuthToken')->plainTextToken;
+
+            return response()->json(['message' => 'Utilisateur enregistré avec succès', 'user' => $user, 'token' => $token], 201);
         } catch (ValidationException $e) {
             return response()->json(['errors' => $e->errors()], 400);
         }
     }
+
 
     public function login(Request $request)
     {
