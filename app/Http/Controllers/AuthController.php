@@ -69,11 +69,19 @@ class AuthController extends Controller
             return response()->json(['token' => $token, 'user' => $user], 200);
         }
 
+        // Vérifie si l'email existe dans la base de données
+        $userExists = User::where('email', $request->email)->exists();
+
+        if (!$userExists) {
+            return response()->json(['message' => 'Adresse email ou mot de passe incorrect'], 401);
+        }
+
+        // Si l'email existe mais le mot de passe est incorrect
         throw ValidationException::withMessages([
-            'email' => [Lang::get('auth.failed')],
-            'password' => [Lang::get('auth.failed')],
+            'email' => ['Adresse email ou mot de passe incorrect'],
         ]);
     }
+
 
     public function getUser(Request $request)
     {
