@@ -91,4 +91,20 @@ class AuthController extends Controller
         // Retourne les informations de l'utilisateur sous forme de réponse JSON
         return response()->json(['user' => $user], 200);
     }
+
+    public function updateUsername(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string',
+        ], [
+            'name.required' => 'Le nom est requis.',
+        ]);
+
+        $user = $request->user();
+        $user->name = $request->name;
+        $user->save();
+
+        return response()->json(['message' => 'Nom d\'utilisateur mis à jour avec succès', 'user' => $user], 200);
+    }
+
 }
