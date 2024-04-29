@@ -17,7 +17,7 @@ class AuthController extends Controller
     {
         try {
             $request->validate([
-                'first_name' => 'required|string', // Ajout du champ "first_name" requis
+                'first_name' => 'required|string',
                 'name' => 'required|string',
                 'email' => 'required|string|email|unique:users',
                 'password' => 'required|string|min:8',
@@ -34,7 +34,7 @@ class AuthController extends Controller
             ]);
 
             $user = User::create([
-                'first_name' => $request->first_name, // Sauvegarde du champ "first_name"
+                'first_name' => $request->first_name,
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
