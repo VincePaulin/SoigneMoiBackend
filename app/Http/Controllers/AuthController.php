@@ -11,15 +11,19 @@ use Illuminate\Support\Facades\Lang;
 
 class AuthController extends Controller
 {
+    // AuthController.php
+
     public function register(Request $request)
     {
         try {
             $request->validate([
+                'first_name' => 'required|string', // Ajout du champ "first_name" requis
                 'name' => 'required|string',
                 'email' => 'required|string|email|unique:users',
                 'password' => 'required|string|min:8',
                 'address' => 'required|string',
             ], [
+                'first_name.required' => 'Le prénom est requis.',
                 'name.required' => 'Le nom est requis.',
                 'email.required' => 'L\'adresse email est requise.',
                 'email.email' => 'L\'adresse email doit être une adresse email valide.',
@@ -30,6 +34,7 @@ class AuthController extends Controller
             ]);
 
             $user = User::create([
+                'first_name' => $request->first_name, // Sauvegarde du champ "first_name"
                 'name' => $request->name,
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
@@ -47,7 +52,7 @@ class AuthController extends Controller
             return response()->json(['errors' => $e->errors()], 400);
         }
     }
-
+    
 
     public function login(Request $request)
     {
