@@ -4,24 +4,31 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateStaysTable extends Migration
+return new class extends Migration
 {
-    public function up()
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
     {
         Schema::create('stays', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('doctor_id')->nullable()->constrained()->onDelete('cascade');
             $table->string('motif');
             $table->string('type');
-            $table->date('start_date');
-            $table->date('end_date');
-            $table->text('precision')->nullable();
+            $table->dateTime('start_date');
+            $table->dateTime('end_date');
+            $table->string('precision')->nullable();
             $table->timestamps();
-        });
+        });              
     }
 
-    public function down()
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
     {
         Schema::dropIfExists('stays');
     }
-}
+};
