@@ -27,9 +27,20 @@ class StayController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after:start_date',
             'doctor_id' => 'exists:doctors,id',
+        ], [
+            'motif.required' => 'Le motif du séjour est requis.',
+            'motif.string' => 'Le motif du séjour doit être une chaîne de caractères.',
+            'type.required' => 'Le type de séjour est requis.',
+            'type.string' => 'Le type de séjour doit être une chaîne de caractères.',
+            'start_date.required' => 'La date de début du séjour est requise.',
+            'start_date.date' => 'La date de début du séjour doit être une date valide.',
+            'end_date.required' => 'La date de fin du séjour est requise.',
+            'end_date.date' => 'La date de fin du séjour doit être une date valide.',
+            'end_date.after' => 'La date de fin du séjour doit être postérieure à la date de début du séjour.',
+            'doctor_id.exists' => 'Le médecin sélectionné n\'existe pas.',
         ]);
 
-         // Création du séjour associé à l'utilisateur
+        // Création du séjour associé à l'utilisateur
         $stayData = [
             'user_id' => $user->id,
             'motif' => $validatedData['motif'],
