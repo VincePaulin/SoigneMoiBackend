@@ -14,7 +14,7 @@ Route::middleware('auth:sanctum')->put('/user/update-username', [AuthController:
 // Routes for stays
 Route::middleware('auth:sanctum')->get('/user/stays', [StayController::class, 'getUserStays']);
 Route::middleware('auth:sanctum')->post('/stays/create', [StayController::class, 'createStay']);
-Route::middleware('auth:sanctum')->post('/stay/doctors', [StayController::class, 'getDoctorsByMatricules']);
 
 // Route for doctors
 Route::get('/doctors/list', [DoctorController::class, 'getList']);
+Route::middleware('auth:sanctum')->post('/stay/doctors', [DoctorController::class, 'getDoctorsByMatricules']);
