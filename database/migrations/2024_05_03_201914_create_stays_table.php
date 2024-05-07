@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('stays', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
-            $table->foreignId('doctor_id')->nullable()->constrained()->onDelete('cascade');
+            $table->string('doctor_id')->nullable();
             $table->string('motif');
             $table->string('type');
             $table->dateTime('start_date');
             $table->dateTime('end_date');
             $table->string('precision')->nullable();
             $table->timestamps();
-        });              
+        });
     }
 
     /**
