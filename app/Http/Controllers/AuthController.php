@@ -7,7 +7,6 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Lang;
 
 class AuthController extends Controller
 {
@@ -41,10 +40,10 @@ class AuthController extends Controller
                 'address' => $request->address,
             ]);
 
-            // Authentifier automatiquement l'utilisateur nouvellement enregistré
+            // Automatically authenticate newly registered users
             Auth::login($user);
 
-            // Générer un token pour l'utilisateur nouvellement enregistré
+            // Generate token for newly registered user
             $token = $user->createToken('AuthToken')->plainTextToken;
 
             return response()->json(['message' => 'Utilisateur enregistré avec succès', 'user' => $user, 'token' => $token], 201);
@@ -52,7 +51,7 @@ class AuthController extends Controller
             return response()->json(['errors' => $e->errors()], 400);
         }
     }
-    
+
 
     public function login(Request $request)
     {
@@ -71,29 +70,30 @@ class AuthController extends Controller
             $user = Auth::user();
             $token = $user->createToken('AuthToken')->plainTextToken;
 
+            $role = $user->isAdmin() ? 'admin' : 'user'; // Checks if the user is an administrator
+
             return response()->json(['token' => $token, 'user' => $user], 200);
         }
 
-        // Vérifie si l'email existe dans la base de données
+        // Checks if the email exists in the database
         $userExists = User::where('email', $request->email)->exists();
 
         if (!$userExists) {
             return response()->json(['message' => 'Adresse email ou mot de passe incorrect'], 401);
         }
 
-        // Si l'email existe mais le mot de passe est incorrect
+        // If the email exists but the password is incorrect
         throw ValidationException::withMessages([
             'email' => ['Adresse email ou mot de passe incorrect'],
         ]);
     }
 
-
     public function getUser(Request $request)
     {
-        // Récupérer l'utilisateur authentifié
+        // Recover authenticated user
         $user = $request->user();
 
-        // Retourne les informations de l'utilisateur sous forme de réponse JSON
+        // Returns user information as a JSON response
         return response()->json(['user' => $user], 200);
     }
 
@@ -111,5 +111,4 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'Nom d\'utilisateur mis à jour avec succès', 'user' => $user], 200);
     }
-
 }
