@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StayController;
 use App\Http\Controllers\DoctorController;
+use App\Http\Controllers\AdminController;
+use App\Http\Middleware\AdminMiddleware;
 
 Route::post('auth/register', [AuthController::class, 'register']);
 Route::post('auth/login', [AuthController::class, 'login']);
@@ -18,3 +20,8 @@ Route::middleware('auth:sanctum')->post('/stays/create', [StayController::class,
 // Route for doctors
 Route::get('/doctors/list', [DoctorController::class, 'getList']);
 Route::middleware('auth:sanctum')->post('/stay/doctors', [DoctorController::class, 'getDoctorsByMatricules']);
+
+
+Route::middleware(['auth:sanctum', AdminMiddleware::class])->group(function () {
+    Route::get('/admin/doctors', [AdminController::class, 'getAllDoctors']);
+});
