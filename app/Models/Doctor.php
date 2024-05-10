@@ -15,6 +15,8 @@ class Doctor extends Model
         'specialty',
         'medicalSections',
         'matricule',
+        'avatarURL',
+        'sex',
     ];
 
     public function stays()
