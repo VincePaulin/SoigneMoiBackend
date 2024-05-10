@@ -21,7 +21,8 @@ Route::middleware('auth:sanctum')->post('/stays/create', [StayController::class,
 Route::get('/doctors/list', [DoctorController::class, 'getList']);
 Route::middleware('auth:sanctum')->post('/stay/doctors', [DoctorController::class, 'getDoctorsByMatricules']);
 
-
+// Route for admin
 Route::middleware(['auth:sanctum', AdminMiddleware::class])->group(function () {
     Route::get('/admin/doctors', [AdminController::class, 'getAllDoctors']);
+    Route::post('/admin/doctors/create', [AdminController::class, 'createDoctor']);
 });
