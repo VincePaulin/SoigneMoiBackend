@@ -23,4 +23,9 @@ class Doctor extends Model
     {
         return $this->hasMany(Stay::class);
     }
+
+    public function agenda()
+    {
+        return $this->hasOne(Agenda::class, 'doctor_matricule', 'matricule');
+    }
 }
