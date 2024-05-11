@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Doctor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Agenda;
 
 class AdminController extends Controller
 {
@@ -95,5 +96,29 @@ class AdminController extends Controller
             // In case of error, return 500 Internal Server Error response
             return response()->json(['error' => 'Une erreur est survenue lors de la suppression du docteur. Veuillez réessayer.'], 500);
         }
+    }
+
+    public function getAllAgendas()
+    {
+        // Retrieve all doctors
+        $doctors = Doctor::all();
+
+        // Browse all doctors to check and create missing agendas
+        foreach ($doctors as $doctor) {
+            // Check whether the doctor has a diary
+            if (!$doctor->agenda) {
+
+                // Create a new agenda for this doctor
+                Agenda::create([
+                    'doctor_matricule' => $doctor->matricule,
+                ]);
+            }
+        }
+
+        // Retrieve all doctors with their diaries
+        $agendas = Agenda::with('doctor')->get();
+
+        // Return JSON response containing all agendas
+        return response()->json(['agendas' => $agendas], 200);
     }
 }
