@@ -27,4 +27,5 @@ Route::middleware(['auth:sanctum', AdminMiddleware::class])->group(function () {
     Route::post('/admin/doctors/create', [AdminController::class, 'createDoctor']);
     Route::delete('/admin/doctor/delete/{matricule}', [AdminController::class, 'deleteDoctor']);
     Route::get('/admin/agendas', [AdminController::class, 'getAllAgendas']);
+    Route::get('/admin/doctor/stays', [AdminController::class, 'getStaysByDoctorMatricule']);
 });

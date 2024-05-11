@@ -6,6 +6,7 @@ use App\Models\Doctor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Agenda;
+use App\Models\Stay;
 
 class AdminController extends Controller
 {
@@ -120,5 +121,36 @@ class AdminController extends Controller
 
         // Return JSON response containing all agendas
         return response()->json(['agendas' => $agendas], 200);
+    }
+
+    public function getStaysByDoctorMatricule(Request $request)
+    {
+        // Validate the doctor's number in the query
+        $request->validate([
+            'matricule' => 'required|string', // To ensure that the personnel number is present and is a character string
+        ], [
+            'matricule.required' => 'Le matricule du médecin est requis.',
+        ]);
+
+        // Search for the doctor corresponding to the personnel number
+        $doctor = Doctor::where('matricule', $request->matricule)->first();
+
+        // Check if the doctor exists
+        if (!$doctor) {
+            return response()->json(['error' => 'Médecin non trouvé.'], 404);
+        }
+
+        try {
+            // Retrieves all stays associated with the doctor found with the corresponding user
+            $stays = Stay::with('user')
+                ->where('doctor_id', $doctor->matricule)
+                ->get();
+
+            // Return stays successfully
+            return response()->json(['stays' => $stays], 200);
+        } catch (\Exception $e) {
+            // On error, returns an error response
+            return response()->json(['error' => 'Une erreur est survenue lors de la récupération des séjours.'], 500);
+        }
     }
 }
