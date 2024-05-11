@@ -68,4 +68,32 @@ class AdminController extends Controller
             return response()->json(['error' => 'Une erreur est survenue lors de la création du docteur. Veuillez réessayer.'], 500);
         }
     }
+
+    public function deleteDoctor($matricule)
+    {
+        // Find the doctor by matricule
+        $doctor = Doctor::where('matricule', $matricule)->first();
+
+        // If doctor does not exist, return 404 Not Found response
+        if (!$doctor) {
+            return response()->json(['error' => 'Docteur non trouvé.'], 404);
+        }
+
+        try {
+            // Delete doctor's photo from storage if it exists
+            if ($doctor->avatarURL) {
+                $avatarPath = str_replace(asset('storage/'), 'public/', $doctor->avatarURL);
+                Storage::delete($avatarPath);
+            }
+
+            // Delete the doctor from database
+            $doctor->delete();
+
+            // Return success response
+            return response()->json(['message' => 'Docteur supprimé avec succès.'], 200);
+        } catch (\Exception $e) {
+            // In case of error, return 500 Internal Server Error response
+            return response()->json(['error' => 'Une erreur est survenue lors de la suppression du docteur. Veuillez réessayer.'], 500);
+        }
+    }
 }
