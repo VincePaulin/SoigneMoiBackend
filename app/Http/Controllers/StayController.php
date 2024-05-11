@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Stay;
-use App\Models\Doctor;
 
 class StayController extends Controller
 {

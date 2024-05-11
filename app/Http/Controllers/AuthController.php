@@ -38,6 +38,7 @@ class AuthController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'address' => $request->address,
+                'role' => "user",
             ]);
 
             // Automatically authenticate newly registered users
