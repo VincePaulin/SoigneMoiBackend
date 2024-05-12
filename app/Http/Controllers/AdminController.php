@@ -5,12 +5,32 @@ namespace App\Http\Controllers;
 use App\Models\Doctor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use App\Models\User;
 use App\Models\Agenda;
 use App\Models\Stay;
 use App\Models\Appointment;
 
 class AdminController extends Controller
 {
+    function getUserFullName(Request $request)
+    {
+        // Validate query data
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+        ]);
+
+        try {
+            // Retrieve the user based on the ID provided in the request
+            $user = User::findOrFail($request->user_id);
+
+            // Return user's full name
+            return response()->json(['full_name' => $user->first_name . ' ' . $user->name], 200);
+        } catch (\Exception $e) {
+            // In case of error, return an error response
+            return response()->json(['error' => 'Une erreur est survenue lors de la récupération du nom de l\'utilisateur.'], 500);
+        }
+    }
+
     public function getAllDoctors()
     {
         $doctors = Doctor::all();
