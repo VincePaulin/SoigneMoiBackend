@@ -88,6 +88,11 @@ class AdminController extends Controller
                 Storage::delete($avatarPath);
             }
 
+            // Delete the agenda associated with the doctor, if any
+            if ($doctor->agenda) {
+                $doctor->agenda->delete();
+            }
+
             // Delete the doctor from database
             $doctor->delete();
 
@@ -151,6 +156,38 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             // On error, returns an error response
             return response()->json(['error' => 'Une erreur est survenue lors de la récupération des séjours.'], 500);
+        }
+    }
+
+    public function getAgendaByDoctorMatricule(Request $request)
+    {
+        // Valider le matricule du médecin dans la requête
+        $request->validate([
+            'matricule' => 'required|string', // Pour garantir que le numéro du personnel est présent et est une chaîne de caractères
+        ], [
+            'matricule.required' => 'Le matricule du médecin est requis.',
+        ]);
+
+        // Rechercher le médecin correspondant au numéro de matricule
+        $doctor = Doctor::where('matricule', $request->matricule)->first();
+
+        // Vérifier si le médecin existe
+        if (!$doctor) {
+            return response()->json(['error' => 'Médecin non trouvé.'], 404);
+        }
+
+        try {
+            // Récupérer l'agenda associé au médecin
+            $agenda = Agenda::where('doctor_matricule', $doctor->matricule)->first();
+
+            // Incorporer les informations du médecin à l'intérieur de l'objet Agenda
+            $agenda->doctor = $doctor;
+
+            // Retourner l'agenda avec succès
+            return response()->json(['agenda' => $agenda], 200);
+        } catch (\Exception $e) {
+            // En cas d'erreur, retourner une réponse d'erreur
+            return response()->json(['error' => 'Une erreur est survenue lors de la récupération de l\'agenda.'], 500);
         }
     }
 }
