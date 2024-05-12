@@ -248,4 +248,27 @@ class AdminController extends Controller
             return response()->json(['error' => 'Une erreur est survenue lors de la récupération des rendez-vous.'], 500);
         }
     }
+
+    public function getAppointmentsByDoctorMatricule(Request $request)
+    {
+        // Validate query data
+        $request->validate([
+            'doctor_matricule' => 'required|string|exists:doctors,matricule',
+        ], [
+            'doctor_matricule.required' => 'Le matricule du médecin est requis.',
+            'doctor_matricule.exists' => 'Le médecin avec le matricule spécifié n\'existe pas.',
+        ]);
+
+        try {
+            // Retrieve all appointments for the specified doctor_matricule where start_date is greater than today
+            $appointments = Appointment::where('doctor_matricule', $request->doctor_matricule)
+                ->whereDate('start_date', '>=', now()->toDateString())->get();
+
+            // Return appointments successfully
+            return response()->json(['appointments' => $appointments], 200);
+        } catch (\Exception $e) {
+            // On error, returns an error response
+            return response()->json(['error' => 'Une erreur est survenue lors de la récupération des rendez-vous.'], 500);
+        }
+    }
 }
