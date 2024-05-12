@@ -234,4 +234,18 @@ class AdminController extends Controller
             return response()->json(['error' => 'Une erreur est survenue lors de la création de la réservation. Veuillez réessayer.'], 500);
         }
     }
+
+    public function getAppointmentsStartingToday()
+    {
+        try {
+            // Retrieves all appointments with a start date greater than or equal to today's date
+            $appointments = Appointment::whereDate('start_date', '>=', now()->toDateString())->get();
+
+            // Returns appointments successfully
+            return response()->json(['appointments' => $appointments], 200);
+        } catch (\Exception $e) {
+            // On error, returns an error response
+            return response()->json(['error' => 'Une erreur est survenue lors de la récupération des rendez-vous.'], 500);
+        }
+    }
 }
