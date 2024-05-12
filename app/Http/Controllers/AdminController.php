@@ -206,5 +206,32 @@ class AdminController extends Controller
         }
     }
 
-   
+    public function createAppointment(Request $request)
+    {
+        // Validate query data
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after:start_date',
+            'patient_id' => 'required|exists:users,id',
+            'doctor_matricule' => 'required|exists:doctors,matricule',
+            'stay_id' => 'required|exists:stays,id',
+        ]);
+
+        try {
+            // Create a new Appointment
+            $appointment = Appointment::create([
+                'start_date' => $request->start_date,
+                'end_date' => $request->end_date,
+                'patient_id' => $request->patient_id,
+                'doctor_matricule' => $request->doctor_matricule,
+                'stay_id' => $request->stay_id,
+            ]);
+
+            // Return a JSON response with the newly created appointment
+            return response()->json(['appointment' => $appointment], 201);
+        } catch (\Exception $e) {
+            // In case of error, return an error response
+            return response()->json(['error' => 'Une erreur est survenue lors de la création de la réservation. Veuillez réessayer.'], 500);
+        }
+    }
 }
