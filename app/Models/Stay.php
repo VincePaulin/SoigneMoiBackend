@@ -35,4 +35,9 @@ class Stay extends Model
     {
         return $this->belongsTo(Doctor::class);
     }
+
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class, 'stay_id');
+    }
 }

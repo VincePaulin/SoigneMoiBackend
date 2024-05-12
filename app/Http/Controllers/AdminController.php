@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Agenda;
 use App\Models\Stay;
+use App\Models\Appointment;
 
 class AdminController extends Controller
 {
@@ -190,4 +191,20 @@ class AdminController extends Controller
             return response()->json(['error' => 'Une erreur est survenue lors de la récupération de l\'agenda.'], 500);
         }
     }
+
+    public function getAllStayNotProgramed()
+    {
+        try {
+            // Récupère tous les séjours qui n'ont pas de rendez-vous programmé
+            $stays = Stay::whereDoesntHave('appointments')->get();
+
+            // Retourne les séjours avec succès
+            return response()->json(['stays' => $stays], 200);
+        } catch (\Exception $e) {
+            // En cas d'erreur, retourne une réponse d'erreur
+            return response()->json(['error' => 'Une erreur est survenue lors de la récupération des séjours non programmés.'], 500);
+        }
+    }
+
+   
 }

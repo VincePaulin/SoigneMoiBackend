@@ -29,4 +29,5 @@ Route::middleware(['auth:sanctum', AdminMiddleware::class])->group(function () {
     Route::get('/admin/agendas', [AdminController::class, 'getAllAgendas']);
     Route::get('/admin/doctor/stays', [AdminController::class, 'getStaysByDoctorMatricule']);
     Route::get('/admin/doctor-agenda', [AdminController::class, 'getAgendaByDoctorMatricule']);
+    Route::get('/admin/stay-not-programed', [AdminController::class, 'getAllStayNotProgramed']);
 });
