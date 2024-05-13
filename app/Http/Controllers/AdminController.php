@@ -235,6 +235,7 @@ class AdminController extends Controller
             'patient_id' => 'required|exists:users,id',
             'doctor_matricule' => 'required|exists:doctors,matricule',
             'stay_id' => 'required|exists:stays,id',
+            'motif' => 'required|string',
         ]);
 
         try {
@@ -245,6 +246,7 @@ class AdminController extends Controller
                 'patient_id' => $request->patient_id,
                 'doctor_matricule' => $request->doctor_matricule,
                 'stay_id' => $request->stay_id,
+                'motif' => $request->motif,
             ]);
 
             // Return a JSON response with the newly created appointment
