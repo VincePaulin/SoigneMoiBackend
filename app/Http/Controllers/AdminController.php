@@ -240,8 +240,10 @@ class AdminController extends Controller
         ]);
 
         try {
-            // Check if there is an appointment with the same start date
-            $existingAppointment = Appointment::where('start_date', $request->start_date)->first();
+            // Check if there is an appointment with the same start date and doctor matricule
+            $existingAppointment = Appointment::where('start_date', $request->start_date)
+                ->where('doctor_matricule', $request->doctor_matricule)
+                ->first();
 
             if ($existingAppointment) {
                 // If an appointment with the same start date exists, return a conflict response
