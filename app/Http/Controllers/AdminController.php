@@ -247,6 +247,14 @@ class AdminController extends Controller
                 return response()->json(['error' => 'Une réservation avec la même date de début existe déjà. Veuillez choisir une autre date.'], 409);
             }
 
+            // Check if there is an appointment with the same stay_id
+            $existingStayAppointment = Appointment::where('stay_id', $request->stay_id)->first();
+
+            if ($existingStayAppointment) {
+                // If an appointment with the same stay_id exists, return a conflict response
+                return response()->json(['error' => 'Un rendez-vous pour ce séjour existe déjà. Veuillez sélectionner un autre séjour.'], 409);
+            }
+
             // Create a new Appointment
             $appointment = Appointment::create([
                 'start_date' => $request->start_date,
