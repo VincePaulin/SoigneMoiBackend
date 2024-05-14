@@ -34,4 +34,5 @@ Route::middleware(['auth:sanctum', AdminMiddleware::class])->group(function () {
     Route::post('/admin/create-appointment', [AdminController::class, 'createAppointment']);
     Route::get('/admin/get-appointments-starting-today', [AdminController::class, 'getAppointmentsStartingToday']);
     Route::get('/admin/get-appointments-to-doc-starting-today', [AdminController::class, 'getAppointmentsByDoctorMatricule']);
+    Route::get('/admin/get-demands-count-for-each-doctor', [AdminController::class, 'getStayCountWithNoAppointmentForEachDoctor']);
 });

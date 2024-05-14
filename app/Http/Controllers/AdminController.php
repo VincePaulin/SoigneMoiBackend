@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Doctor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use App\Models\User;
 use App\Models\Agenda;
 use App\Models\Stay;
@@ -307,6 +308,28 @@ class AdminController extends Controller
         } catch (\Exception $e) {
             // On error, returns an error response
             return response()->json(['error' => 'Une erreur est survenue lors de la récupération des rendez-vous.'], 500);
+        }
+    }
+
+    public function getStayCountWithNoAppointmentForEachDoctor()
+    {
+        try {
+            // Use a query grouped by doctor_id to obtain the number of stays for each doctor that have no associated appointments
+            $stayCounts = Stay::leftJoin('doctors', 'stays.doctor_id', '=', 'doctors.matricule')
+                ->select('doctors.matricule', 'doctors.fullName', DB::raw('COUNT(stays.id) as stay_count'))
+                ->whereNotExists(function ($query) {
+                    $query->select(DB::raw(1))
+                        ->from('appointments')
+                        ->whereRaw('appointments.stay_id = stays.id');
+                })
+                ->groupBy('doctors.matricule', 'doctors.fullName')
+                ->get();
+
+            // Returns the number of stays for each successful doctor
+            return response()->json(['stay_counts' => $stayCounts], 200);
+        } catch (\Exception $e) {
+            // On error, returns an error response
+            return response()->json(['error' => 'Une erreur est survenue lors de la récupération des nombres de séjours pour chaque médecin.'], 500);
         }
     }
 }
