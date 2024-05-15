@@ -6,6 +6,7 @@ use App\Models\Doctor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use DateTime;
 use App\Models\User;
 use App\Models\Agenda;
 use App\Models\Stay;
@@ -268,6 +269,42 @@ class AdminController extends Controller
         }
     }
 
+    public function hasOverlappingAppointments($startDate, $endDate, $doctorMatricule)
+    {
+        $startDate = new DateTime($startDate);
+        $endDate = new DateTime($endDate);
+
+        // Counting the number of overlapping appointments
+        $overlappingCount = 0;
+
+        // Loop through each day between startDate and endDate
+        $currentDate = $startDate;
+        while ($currentDate <= $endDate) {
+            // Counting the number of appointments for the selected day
+            $appointmentsForDay = Appointment::where('doctor_matricule', $doctorMatricule)
+                ->where(function ($query) use ($currentDate) {
+                    $query->whereDate('start_date', $currentDate)
+                        ->orWhereDate('end_date', $currentDate)
+                        ->orWhere(function ($query) use ($currentDate) {
+                            $query->where('start_date', '<', $currentDate)
+                                ->where('end_date', '>', $currentDate);
+                        });
+                })
+                ->get();
+
+            // If the number of appointments for this day is already 5, increment the overlap counter
+            if ($appointmentsForDay->count() >= 5) {
+                $overlappingCount++;
+            }
+
+            // Move to the next day
+            $currentDate = $currentDate->modify('+1 day');
+        }
+
+        // If the overlap counter is greater than zero, there is at least one day with 5 appointments
+        return $overlappingCount > 0;
+    }
+
     public function createAppointment(Request $request)
     {
         // Validate query data
@@ -287,6 +324,12 @@ class AdminController extends Controller
             if ($existingStayAppointment) {
                 // If an appointment with the same stay_id exists, return a conflict response
                 return response()->json(['error' => 'Un rendez-vous pour ce séjour existe déjà. Veuillez sélectionner un autre séjour.'], 409);
+            }
+
+            // Check if there are any overlapping appointments
+            if ($this->hasOverlappingAppointments($request->start_date, $request->end_date, $request->doctor_matricule)) {
+                // If there are overlapping appointments, return a conflict response
+                return response()->json(['error' => 'Le rendez-vous chevauche déjà un ou plusieurs jours complets. Veuillez sélectionner d\'autres dates.'], 409);
             }
 
             // Create a new Appointment
