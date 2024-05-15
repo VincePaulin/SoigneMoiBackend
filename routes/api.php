@@ -7,8 +7,12 @@ use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\AdminController;
 use App\Http\Middleware\AdminMiddleware;
 
+// Route for login/register
 Route::post('auth/register', [AuthController::class, 'register']);
 Route::post('auth/login', [AuthController::class, 'login']);
+Route::post('auth/doctor/login', [DoctorController::class, 'login']);
+
+
 Route::middleware('auth:sanctum')->get('/user', [AuthController::class, 'getUser']);
 Route::middleware('auth:sanctum')->put('/user/update-username', [AuthController::class, 'updateUsername']);
 
