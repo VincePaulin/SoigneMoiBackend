@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Doctor;
+use App\Models\User;
+use Illuminate\Support\Str;
 
 class InsertDemoData extends Seeder
 {
@@ -124,6 +126,29 @@ class InsertDemoData extends Seeder
 
         foreach ($doctors as $doctorData) {
             Doctor::create($doctorData);
+
+            // Remove spaces from the full name and convert to lower case
+            $username = strtolower(str_replace(' ', '', $doctorData['fullName']));
+
+            // E-mail address generation using username and domain
+            $email = $username . '@soignemoi.com';
+
+            // Random password generation
+            $password = Str::random(7);
+
+            // Creation of a user with the “doctor” role and association with the corresponding doctor
+            $user = User::create([
+                'name' => $doctorData['fullName'],
+                'email' => $email,
+                'password' => bcrypt($password),
+                'role' => User::ROLE_DOCTOR,
+                'matricule' => $doctorData['matricule'],
+            ]);
+
+            // Print user details
+            $this->command->info("Utilisateur doctor créé avec succès:");
+            $this->command->info("Email: $email");
+            $this->command->info("Mot de passe: $password");
         }
     }
 }
