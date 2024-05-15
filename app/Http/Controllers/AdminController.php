@@ -228,24 +228,17 @@ class AdminController extends Controller
                 return response()->json(['error' => 'Médecin introuvable.'], 404);
             }
 
-            // Récupérer la spécialité du médecin sous forme de tableau
-            $medicalSections = json_decode($doctor->medicalSections, true);
-            // Prendre le premier élément du tableau comme spécialité
-            $firstMedicalSection = isset($medicalSections[0]) ? $medicalSections[0] : null;
+            // Retrieve the doctor's specialty
+            $specialty = $doctor->specialty;
 
-            // Vérifier si la spécialité existe
-            if (!$firstMedicalSection) {
-                return response()->json(['error' => 'Spécialité introuvable.'], 404);
-            }
-
-            // Vérifier si la spécialité existe
-            if (!$firstMedicalSection) {
+            // Check if the specialty exists
+            if (!$specialty) {
                 return response()->json(['error' => 'Spécialité introuvable.'], 404);
             }
 
             // Find all unscheduled stays that have the same type as the physician's specialty
             $stays = Stay::whereDoesntHave('appointments')
-                ->where('type', $firstMedicalSection)
+                ->where('type', $specialty)
                 ->get();
 
             return response()->json(['stays' => $stays], 200);
