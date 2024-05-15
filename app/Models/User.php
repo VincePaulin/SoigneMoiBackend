@@ -13,6 +13,7 @@ class User extends Authenticatable
 
     const ROLE_USER = 'user';
     const ROLE_ADMIN = 'admin';
+    const ROLE_DOCTOR = 'doctor';
 
     /**
      * The attributes that are mass assignable.
@@ -50,8 +51,23 @@ class User extends Authenticatable
         ];
     }
 
+    /**
+     * Check if the user has the role of admin.
+     *
+     * @return bool
+     */
     public function isAdmin()
     {
         return $this->role === self::ROLE_ADMIN;
+    }
+
+    /**
+     * Check if the user has the role of doctor.
+     *
+     * @return bool
+     */
+    public function isDoctor(): bool
+    {
+        return $this->role === self::ROLE_DOCTOR;
     }
 }
