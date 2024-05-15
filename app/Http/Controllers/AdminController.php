@@ -213,6 +213,47 @@ class AdminController extends Controller
         }
     }
 
+    public function getStayNotProgrammedByDoctor(Request $request)
+    {
+        try {
+            // Retrieve the doctor's personnel number from the query
+            $matricule = $request->matricule;
+
+            // Find the doctor corresponding to your personnel number
+            $doctor = Doctor::where('matricule', $matricule)->first();
+
+            // Check if the doctor exists
+            if (!$doctor) {
+                return response()->json(['error' => 'Médecin introuvable.'], 404);
+            }
+
+            // Récupérer la spécialité du médecin sous forme de tableau
+            $medicalSections = json_decode($doctor->medicalSections, true);
+            // Prendre le premier élément du tableau comme spécialité
+            $firstMedicalSection = isset($medicalSections[0]) ? $medicalSections[0] : null;
+
+            // Vérifier si la spécialité existe
+            if (!$firstMedicalSection) {
+                return response()->json(['error' => 'Spécialité introuvable.'], 404);
+            }
+
+            // Vérifier si la spécialité existe
+            if (!$firstMedicalSection) {
+                return response()->json(['error' => 'Spécialité introuvable.'], 404);
+            }
+
+            // Find all unscheduled stays that have the same type as the physician's specialty
+            $stays = Stay::whereDoesntHave('appointments')
+                ->where('type', $firstMedicalSection)
+                ->get();
+
+            return response()->json(['stays' => $stays], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Une erreur est survenue lors de la récupération des séjours non programmés.'], 500);
+        }
+    }
+
+
     public function getAllStayNotProgramed()
     {
         try {
@@ -240,16 +281,6 @@ class AdminController extends Controller
         ]);
 
         try {
-            // Check if there is an appointment with the same start date and doctor matricule
-            $existingAppointment = Appointment::where('start_date', $request->start_date)
-                ->where('doctor_matricule', $request->doctor_matricule)
-                ->first();
-
-            if ($existingAppointment) {
-                // If an appointment with the same start date exists, return a conflict response
-                return response()->json(['error' => 'Une réservation avec la même date de début existe déjà. Veuillez choisir une autre date.'], 409);
-            }
-
             // Check if there is an appointment with the same stay_id
             $existingStayAppointment = Appointment::where('stay_id', $request->stay_id)->first();
 
