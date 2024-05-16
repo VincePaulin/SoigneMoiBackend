@@ -6,6 +6,7 @@ use App\Models\Agenda;
 use Illuminate\Http\Request;
 use App\Models\Doctor;
 use App\Models\User;
+use App\Models\Avis;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
@@ -120,5 +121,45 @@ class DoctorController extends Controller
             'agenda' => $agenda,
             'appointments' => $appointments,
         ], 200);
+    }
+
+    /**
+     * Create a medical opinion and link it to the patient and the doctor.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function createAvis(Request $request)
+    {
+        $request->validate([
+            'libelle' => 'required|string',
+            'description' => 'required|string',
+            'patient' => 'required|string',
+        ], [
+            'libelle.required' => 'Le champ libellé est requis.',
+            'libelle.string' => 'Le libellé doit être une chaîne de caractères.',
+            'description.required' => 'Le champ description est requis.',
+            'description.string' => 'La description doit être une chaîne de caractères.',
+            'patient.required' => 'Le champ patient est requis.',
+            'patient.string' => 'L\'identifiant du patient doit être une chaîne de caractères.',
+        ]);
+
+        // Recover the authenticated user (the doctor)
+        $doctor = Auth::user();
+
+        // Create a new medical opinion with the query data
+        $avis = new Avis([
+            'libelle' => $request->input('libelle'),
+            'description' => $request->input('description'),
+            'date' => now(),
+            'doctor_id' => $doctor->id,
+            'patient_id' => $request->input('patient'),
+        ]);
+
+        // Record medical opinion in database
+        $avis->save();
+
+        // Return a JSON response to indicate that the notification has been created successfully
+        return response()->json(['message' => 'Avis médical créé avec succès'], 201);
     }
 }
