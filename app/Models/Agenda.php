@@ -20,6 +20,6 @@ class Agenda extends Model
 
     public function appointments()
     {
-        return $this->hasMany(Appointment::class);
+        return $this->hasMany(Appointment::class, 'doctor_matricule', 'doctor_matricule');
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\StayController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\AdminController;
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\DoctorMiddleware;
 
 // Route for login/register
 Route::post('auth/register', [AuthController::class, 'register']);
@@ -40,4 +41,9 @@ Route::middleware(['auth:sanctum', AdminMiddleware::class])->group(function () {
     Route::get('/admin/get-appointments-starting-today', [AdminController::class, 'getAppointmentsStartingToday']);
     Route::get('/admin/get-appointments-to-doc-starting-today', [AdminController::class, 'getAppointmentsByDoctorMatricule']);
     Route::get('/admin/get-demands-count-for-each-doctor', [AdminController::class, 'getStayCountWithNoAppointmentForEachDoctor']);
+});
+
+// Route for doctor
+Route::middleware(['auth:sanctum', DoctorMiddleware::class])->group(function () {
+    Route::get('/doctor/get-data', [DoctorController::class, 'getDoctorAgendaAndAppointments']);
 });

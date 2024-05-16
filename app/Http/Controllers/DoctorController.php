@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Agenda;
 use Illuminate\Http\Request;
 use App\Models\Doctor;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 
 class DoctorController extends Controller
@@ -78,5 +80,45 @@ class DoctorController extends Controller
         throw ValidationException::withMessages([
             'email' => ['Adresse email ou mot de passe incorrect'],
         ]);
+    }
+
+    /**
+     * Retrieves a doctor's diary and all related appointments with the user's matricule.
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getDoctorAgendaAndAppointments()
+    {
+        // Recover currently authenticated user
+        $user = Auth::user();
+
+        // Recover user number
+        $matricule = $user->matricule;
+
+        // Retrieve doctor with specified personnel number
+        $doctor = Doctor::where('matricule', $matricule)->first();
+
+        // Check if the doctor exists
+        if (!$doctor) {
+            return response()->json(['message' => 'Aucun médecin trouvé avec le matricule spécifié'], 404);
+        }
+
+        // Retrieve the doctor's agenda
+        $agenda = Agenda::where('doctor_matricule', $matricule)->first();;
+
+        // Check if the agenda exists
+        if (!$agenda) {
+            return response()->json(['message' => 'Aucun agenda trouvé pour ce médecin'], 404);
+        }
+
+        // Retrieve appointments associated with the calendar
+        $appointments = $agenda->appointments()->where('end_date', '>=', Carbon::now())->with('patient')->get();
+
+        // Return information as a JSON response
+        return response()->json([
+            'doctor' => $doctor,
+            'agenda' => $agenda,
+            'appointments' => $appointments,
+        ], 200);
     }
 }
