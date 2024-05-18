@@ -47,4 +47,5 @@ Route::middleware(['auth:sanctum', AdminMiddleware::class])->group(function () {
 Route::middleware(['auth:sanctum', DoctorMiddleware::class])->group(function () {
     Route::get('/doctor/get-data', [DoctorController::class, 'getDoctorAgendaAndAppointments']);
     Route::post('/doctor/create-review', [DoctorController::class, 'createAvis']);
+    Route::post('doctors/prescription', [DoctorController::class, 'createPrescription']);
 });
