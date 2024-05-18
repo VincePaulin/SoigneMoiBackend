@@ -199,6 +199,16 @@ class DoctorController extends Controller
         // Retrieve authenticated doctor
         $doctor = Auth::user();
 
+        // Check whether a prescription already exists for this patient today
+        $today = Carbon::today();
+        $existingPrescription = Prescription::where('patient_id', $request->input('patient_id'))
+            ->whereDate('start_date', $today)
+            ->exists();
+
+        if ($existingPrescription) {
+            return response()->json(['message' => 'Une prescription a déjà été faite pour ce patient aujourd\'hui.'], 409);
+        }
+
         // Create a new prescription
         $prescription = Prescription::create([
             'patient_id' => $request->input('patient_id'),
