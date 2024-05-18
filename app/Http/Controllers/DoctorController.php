@@ -199,15 +199,7 @@ class DoctorController extends Controller
         // Retrieve authenticated doctor
         $doctor = Auth::user();
 
-        // Check whether a prescription already exists for this patient today
-        $today = Carbon::today();
-        $existingPrescription = Prescription::where('patient_id', $request->input('patient_id'))
-            ->whereDate('start_date', $today)
-            ->exists();
 
-        if ($existingPrescription) {
-            return response()->json(['message' => 'Une prescription a déjà été faite pour ce patient aujourd\'hui.'], 409);
-        }
 
         // Create a new prescription
         $prescription = Prescription::create([
@@ -227,5 +219,64 @@ class DoctorController extends Controller
         }
 
         return response()->json(['message' => 'Prescription créée avec succès', 'prescription' => $prescription], 201);
+    }
+
+    /**
+     * Get all reviews and prescriptions for a given patient_id.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getPatientRecords(Request $request)
+    {
+        $request->validate([
+            'patient_id' => 'required',
+        ], [
+            'patient_id.required' => 'Le champ patient_id est requis.',
+        ]);
+
+        $patientId = $request->input('patient_id');
+
+        // Check if the patient exists
+        $patientExists = User::where('id', $patientId)->exists();
+
+        if (!$patientExists) {
+            // Return empty lists if the patient does not exist
+            return response()->json([
+                'avis' => [],
+                'prescriptions' => [],
+            ], 200);
+        }
+
+        // Retrieve reviews (avis) for the given patient_id and load doctor relation
+        $avis = Avis::where('patient_id', $patientId)->with('doctor')->get()->map(function ($avis) {
+            return [
+                'id' => $avis->id,
+                'libelle' => $avis->libelle,
+                'date' => $avis->date,
+                'description' => $avis->description,
+                'doctor' => $avis->doctor ? $avis->doctor->first_name . ' ' . $avis->doctor->name : null, // Assuming first_name and name are properties in User model
+            ];
+        });
+
+        // Retrieve prescriptions for the given patient_id and load doctor relation
+        $prescriptions = Prescription::where('patient_id', $patientId)->with(['drugs', 'doctor'])->get()->map(function ($prescription) {
+            return [
+                'start_date' => $prescription->start_date,
+                'end_date' => $prescription->end_date,
+                'drugs' => $prescription->drugs->map(function ($drug) {
+                    return [
+                        'drug' => $drug->drug,
+                        'dosage' => $drug->dosage,
+                    ];
+                }),
+            ];
+        });
+
+        // Return the results as a JSON response
+        return response()->json([
+            'avis' => $avis,
+            'prescriptions' => $prescriptions,
+        ], 200);
     }
 }
