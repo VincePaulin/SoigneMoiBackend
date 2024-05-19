@@ -5,13 +5,16 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StayController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\SecretaryController;
 use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\DoctorMiddleware;
+use App\Http\Middleware\SecretaryMiddleware;
 
 // Route for login/register
 Route::post('auth/register', [AuthController::class, 'register']);
 Route::post('auth/login', [AuthController::class, 'login']);
 Route::post('auth/doctor/login', [DoctorController::class, 'login']);
+Route::post('/secretary/login', [SecretaryController::class, 'login']);
 
 
 Route::middleware('auth:sanctum')->get('/user', [AuthController::class, 'getUser']);
@@ -49,5 +52,10 @@ Route::middleware(['auth:sanctum', DoctorMiddleware::class])->group(function () 
     Route::post('/doctor/create-review', [DoctorController::class, 'createAvis']);
     Route::post('/doctors/prescription', [DoctorController::class, 'createPrescription']);
     Route::get('/doctors/patient-records', [DoctorController::class, 'getPatientRecords']);
-    Route::post ('/doctor/update-prescription-end-date', [DoctorController::class, 'updatePrescriptionEndDate']);
+    Route::post('/doctor/update-prescription-end-date', [DoctorController::class, 'updatePrescriptionEndDate']);
+});
+
+// Route for Secretary
+Route::middleware(['auth:sanctum', SecretaryMiddleware::class])->group(function () {
+    
 });
