@@ -262,6 +262,7 @@ class DoctorController extends Controller
         // Retrieve prescriptions for the given patient_id and load doctor relation
         $prescriptions = Prescription::where('patient_id', $patientId)->with(['drugs', 'doctor'])->get()->map(function ($prescription) {
             return [
+                'id' => $prescription->id,
                 'start_date' => $prescription->start_date,
                 'end_date' => $prescription->end_date,
                 'drugs' => $prescription->drugs->map(function ($drug) {
@@ -278,5 +279,28 @@ class DoctorController extends Controller
             'avis' => $avis,
             'prescriptions' => $prescriptions,
         ], 200);
+    }
+
+    public function updatePrescriptionEndDate(Request $request)
+    {
+        $request->validate([
+            'prescription_id' => 'required|exists:prescriptions,id',
+            'end_date' => 'required|date|after_or_equal:start_date',
+        ], [
+            'prescription_id.required' => 'Le champ prescription_id est requis.',
+            'prescription_id.exists' => 'La prescription spécifiée n\'existe pas.',
+            'end_date.required' => 'La date de fin est requise.',
+            'end_date.date' => 'La date de fin doit être une date valide.',
+            'end_date.after_or_equal' => 'La date de fin doit être postérieure ou égale à la date de début.',
+        ]);
+
+        // Retrieve the prescription
+        $prescription = Prescription::find($request->input('prescription_id'));
+
+        // Update the end date
+        $prescription->end_date = $request->input('end_date');
+        $prescription->save();
+
+        return response()->json(['message' => 'Date de fin mise à jour avec succès', 'prescription' => $prescription], 200);
     }
 }

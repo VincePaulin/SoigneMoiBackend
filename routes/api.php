@@ -49,4 +49,5 @@ Route::middleware(['auth:sanctum', DoctorMiddleware::class])->group(function () 
     Route::post('/doctor/create-review', [DoctorController::class, 'createAvis']);
     Route::post('/doctors/prescription', [DoctorController::class, 'createPrescription']);
     Route::get('/doctors/patient-records', [DoctorController::class, 'getPatientRecords']);
+    Route::post ('/doctor/update-prescription-end-date', [DoctorController::class, 'updatePrescriptionEndDate']);
 });
