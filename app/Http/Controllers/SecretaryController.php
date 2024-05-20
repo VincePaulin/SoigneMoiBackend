@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Appointment;
 use App\Models\Avis;
+use App\Models\Doctor;
 use App\Models\Prescription;
 use App\Models\Stay;
 use Illuminate\Http\Request;
@@ -147,5 +149,36 @@ class SecretaryController extends Controller
         ];
 
         return response()->json($response);
+    }
+
+    /**
+     * Get all doctors with appointments on today's date.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getDoctorsWithAppointmentsToday(Request $request)
+    {
+        try {
+            // Get today's date
+            $today = Carbon::today();
+
+            // Retrieve all appointments where today is between start_date and end_date
+            $appointments = Appointment::whereDate('start_date', '<=', $today)
+                ->whereDate('end_date', '>=', $today)
+                ->get();
+
+            // Get the doctor matricules from these appointments
+            $doctorMatricules = $appointments->pluck('doctor_matricule')->unique();
+
+            // Retrieve the doctors based on these matricules
+            $doctors = Doctor::whereIn('matricule', $doctorMatricules)->get();
+
+            // Return the list of doctors
+            return response()->json(['doctors' => $doctors], 200);
+        } catch (\Exception $e) {
+            // On error, returns an error response
+            return response()->json(['error' => 'Une erreur est survenue lors de la récupération des docteurs.'], 500);
+        }
     }
 }
