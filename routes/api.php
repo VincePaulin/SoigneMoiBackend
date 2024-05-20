@@ -60,4 +60,5 @@ Route::middleware(['auth:sanctum', SecretaryMiddleware::class])->group(function 
     Route::get('/secretary/ongoing-stays', [SecretaryController::class, 'getOngoingStays']);
     Route::get('/user-details', [SecretaryController::class, 'getUserDetails']);
     Route::get('/doctors-with-appointments-today', [SecretaryController::class, 'getDoctorsWithAppointmentsToday']);
+    Route::get('/doctors', [SecretaryController::class, 'getAllDoctors']);
 });

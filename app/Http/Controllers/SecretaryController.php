@@ -181,4 +181,10 @@ class SecretaryController extends Controller
             return response()->json(['error' => 'Une erreur est survenue lors de la récupération des docteurs.'], 500);
         }
     }
+
+    public function getAllDoctors()
+    {
+        $doctors = Doctor::all();
+        return response()->json(['doctors' => $doctors], 200);
+    }
 }
