@@ -8,6 +8,11 @@ use Illuminate\Support\Str;
 use App\Models\User;
 use App\Models\Doctor;
 use App\Models\Stay;
+use App\Models\Avis;
+use App\Models\Prescription;
+use App\Models\PrescriptionDrug;
+use App\Models\Appointment;
+use App\Models\Agenda;
 use Carbon\Carbon;
 
 class DatabaseSeederDemo extends Seeder
@@ -25,6 +30,7 @@ class DatabaseSeederDemo extends Seeder
             'email' => 'dr.house@soignemoi.com',
             'password' => Hash::make('19962305Vp'),
             'role' => User::ROLE_ADMIN,
+            'address' => '123 Admin St, Admin City',
         ]);
 
         // Create Secretary account
@@ -33,6 +39,7 @@ class DatabaseSeederDemo extends Seeder
             'email' => 'secretary@soignemoi.com',
             'password' => Hash::make('19962305Vp'),
             'role' => User::ROLE_SECRETARY,
+            'address' => '456 Secretary St, Secretary City',
         ]);
 
         // Create Doctor accounts
@@ -157,6 +164,11 @@ class DatabaseSeederDemo extends Seeder
                 'password' => bcrypt($password),
                 'role' => User::ROLE_DOCTOR,
                 'matricule' => $doctorData['matricule'],
+                'address' => 'Doctor Address ' . $doctorData['matricule'],
+            ]);
+
+            Agenda::create([
+                'doctor_matricule' => $doctorData['matricule'],
             ]);
 
             $this->command->info("Doctor account created:");
@@ -164,67 +176,88 @@ class DatabaseSeederDemo extends Seeder
             $this->command->info("Password: $password");
         }
 
-        // Create User accounts
-        $users = User::factory()->count(5)->create(['role' => User::ROLE_USER]);
+        // Create 15 User accounts
+        for ($i = 1; $i <= 15; $i++) {
+            $user = User::factory()->create([
+                'role' => User::ROLE_USER,
+                'address' => 'User Address ' . $i,
+            ]);
+            $this->command->info("User account created with ID: {$user->id}");
 
-        // Create Stays for Users
-        foreach ($users as $user) {
-            // 3 stays starting today
-            for ($i = 0; $i < 3; $i++) {
-                $doctor = Doctor::inRandomOrder()->first();
-                $medicalSection = $doctor->specialty;
+            $doctor = Doctor::inRandomOrder()->first();
+            $medicalSection = $doctor->specialty;
+            
+            $start_date = Carbon::today();
+            $end_date = Carbon::today();
 
-                Stay::create([
-                    'user_id' => $user->id,
-                    'doctor_id' => $doctor->matricule, // Use matricule instead of id
-                    'type' => $medicalSection,
-                    'motif' => 'Routine check-up',
-                    'start_date' => Carbon::today(),
-                    'end_date' => Carbon::today()->addDays(rand(1, 10)),
+            if ($i <= 5) {
+                // 5 stays starting today
+                $start_date = Carbon::today();
+                $end_date = Carbon::today()->addDays(rand(1, 10));
+            } elseif ($i <= 10) {
+                // 5 stays ending today
+                $start_date = Carbon::today()->subDays(rand(1, 10));
+                $end_date = Carbon::today();
+            } else {
+                // 5 stays with random start and end dates
+                $start_date = Carbon::today()->subDays(rand(1, 10));
+                $end_date = Carbon::today()->addDays(rand(1, 10));
+            }
+
+            $stay = Stay::create([
+                'user_id' => $user->id,
+                'doctor_id' => $doctor->matricule, // Use matricule instead of id
+                'type' => $medicalSection,
+                'motif' => 'Routine check-up',
+                'start_date' => $start_date,
+                'end_date' => $end_date,
+            ]);
+
+            // Create Avis for the user
+            Avis::create([
+                'patient_id' => $user->id, // Use patient_id instead of user_id
+                'doctor_id' => $doctor->id, // Use id instead of matricule
+                'libelle' => 'Avis du docteur',
+                'description' => 'Avis médical sur l\'état de santé général du patient.',
+                'date' => Carbon::now(),
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+            ]);
+
+            // Create Prescription for the user
+            $prescription = Prescription::create([
+                'patient_id' => $user->id, // Use patient_id instead of user_id
+                'doctor_id' => $doctor->id, // Use id instead of matricule
+                'created_at' => Carbon::now(),
+                'updated_at' => Carbon::now(),
+                'start_date' => Carbon::now(),
+                'end_date' => Carbon::now(),
+            ]);
+
+            // Add drugs to the prescription
+            $drugs = [
+                'Paracetamol 500mg',
+                'Ibuprofen 200mg',
+                'Amoxicillin 500mg',
+            ];
+
+            foreach ($drugs as $drug) {
+                PrescriptionDrug::create([
+                    'prescription_id' => $prescription->id,
+                    'drug' => $drug,
+                    'dosage' => '2 times a day',
                 ]);
             }
 
-            // 2 stays ending today
-            for ($i = 0; $i < 2; $i++) {
-                $doctor = Doctor::inRandomOrder()->first();
-                $medicalSection = $doctor->specialty;
-
-                Stay::create([
-                    'user_id' => $user->id,
-                    'doctor_id' => $doctor->matricule, // Use matricule instead of id
-                    'type' => $medicalSection,
-                    'motif' => 'Routine check-up',
-                    'start_date' => Carbon::today()->subDays(rand(1, 10)),
-                    'end_date' => Carbon::today(),
-                ]);
-            }
-
-            // 5 additional stays: 3 starting today, 2 ending today
-            for ($i = 0; $i < 3; $i++) {
-                $doctor = Doctor::inRandomOrder()->first();
-                $medicalSection = $doctor->specialty;
-
-                Stay::create([
-                    'user_id' => $user->id,
-                    'doctor_id' => $doctor->matricule, // Use matricule instead of id
-                    'type' => $medicalSection,
-                    'motif' => 'Routine check-up',
-                    'start_date' => Carbon::today(),
-                    'end_date' => Carbon::today()->addDays(rand(1, 10)),
-                ]);
-            }
-
-            for ($i = 0; $i < 2; $i++) {
-                $doctor = Doctor::inRandomOrder()->first();
-                $medicalSection = $doctor->specialty;
-
-                Stay::create([
-                    'user_id' => $user->id,
-                    'doctor_id' => $doctor->matricule, // Use matricule instead of id
-                    'type' => $medicalSection,
-                    'motif' => 'Routine check-up',
-                    'start_date' => Carbon::today()->subDays(rand(1, 10)),
-                    'end_date' => Carbon::today(),
+            if ($i <= 8) {
+                // Create appointments for 8 stays
+                Appointment::create([
+                    'start_date' => $stay->start_date,
+                    'end_date' => $stay->end_date,
+                    'patient_id' => $user->id,
+                    'doctor_matricule' => $doctor->matricule,
+                    'stay_id' => $stay->id,
+                    'motif' => 'Routine check-up appointment',
                 ]);
             }
         }
