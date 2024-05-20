@@ -17,14 +17,14 @@ class AdminUserSeeder extends Seeder
         User::create([
             'first_name' => 'Dr',
             'name' => 'House',
-            'email' => 'dr.house@example.com',
+            'email' => 'dr.house@soignemoi.com',
             'password' => Hash::make($password),
             'role' => User::ROLE_ADMIN,
             'address' => '123 Rue du Docteur',
         ]);
 
         $this->command->info("Utilisateur administrateur créé avec succès:");
-        $this->command->info("Email: dr.house@example.com");
+        $this->command->info("Email: dr.house@soignemoi.com");
         $this->command->info("Mot de passe: $password");
     }
 }

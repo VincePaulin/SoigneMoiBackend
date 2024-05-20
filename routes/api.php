@@ -5,10 +5,18 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\StayController;
 use App\Http\Controllers\DoctorController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\SecretaryController;
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\DoctorMiddleware;
+use App\Http\Middleware\SecretaryMiddleware;
 
+// Route for login/register
 Route::post('auth/register', [AuthController::class, 'register']);
 Route::post('auth/login', [AuthController::class, 'login']);
+Route::post('auth/doctor/login', [DoctorController::class, 'login']);
+Route::post('/secretary/login', [SecretaryController::class, 'login']);
+
+
 Route::middleware('auth:sanctum')->get('/user', [AuthController::class, 'getUser']);
 Route::middleware('auth:sanctum')->put('/user/update-username', [AuthController::class, 'updateUsername']);
 
@@ -36,4 +44,21 @@ Route::middleware(['auth:sanctum', AdminMiddleware::class])->group(function () {
     Route::get('/admin/get-appointments-starting-today', [AdminController::class, 'getAppointmentsStartingToday']);
     Route::get('/admin/get-appointments-to-doc-starting-today', [AdminController::class, 'getAppointmentsByDoctorMatricule']);
     Route::get('/admin/get-demands-count-for-each-doctor', [AdminController::class, 'getStayCountWithNoAppointmentForEachDoctor']);
+});
+
+// Route for doctor
+Route::middleware(['auth:sanctum', DoctorMiddleware::class])->group(function () {
+    Route::get('/doctor/get-data', [DoctorController::class, 'getDoctorAgendaAndAppointments']);
+    Route::post('/doctor/create-review', [DoctorController::class, 'createAvis']);
+    Route::post('/doctors/prescription', [DoctorController::class, 'createPrescription']);
+    Route::get('/doctors/patient-records', [DoctorController::class, 'getPatientRecords']);
+    Route::post('/doctor/update-prescription-end-date', [DoctorController::class, 'updatePrescriptionEndDate']);
+});
+
+// Route for Secretary
+Route::middleware(['auth:sanctum', SecretaryMiddleware::class])->group(function () {
+    Route::get('/secretary/ongoing-stays', [SecretaryController::class, 'getOngoingStays']);
+    Route::get('/user-details', [SecretaryController::class, 'getUserDetails']);
+    Route::get('/doctors-with-appointments-today', [SecretaryController::class, 'getDoctorsWithAppointmentsToday']);
+    Route::get('/doctors', [SecretaryController::class, 'getAllDoctors']);
 });
