@@ -368,9 +368,12 @@ class AdminController extends Controller
         ]);
 
         try {
-            // Retrieve all appointments for the specified doctor_matricule where start_date is greater than today
+            // Calculate the date one month ago
+            $oneMonthAgo = now()->subMonth()->toDateString();
+
+            // Retrieve all appointments for the specified doctor_matricule where end_date is within the last month or in the future
             $appointments = Appointment::where('doctor_matricule', $request->doctor_matricule)
-                ->whereDate('start_date', '>=', now()->toDateString())->get();
+                ->whereDate('end_date', '>=', $oneMonthAgo)->get();
 
             // Return appointments successfully
             return response()->json(['appointments' => $appointments], 200);
@@ -379,6 +382,7 @@ class AdminController extends Controller
             return response()->json(['error' => 'Une erreur est survenue lors de la récupération des rendez-vous.'], 500);
         }
     }
+
 
     public function getStayCountWithNoAppointmentForEachDoctor()
     {
